@@ -1,7 +1,5 @@
 import java.io.*;
 import java.net.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.Scanner;
 
 public class Server {
 

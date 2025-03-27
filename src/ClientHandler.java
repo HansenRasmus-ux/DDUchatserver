@@ -39,7 +39,39 @@ public class ClientHandler implements Runnable {
     }
     public void broadcastMessage(String send){
         for(ClientHandler clientHandler : clientHandlers){
+            try{
+                // hvis brugernavnet ikke er brugerens, så modtages beskeden til dem.
+                if(!clientHandler.username.equals(username))
+                {
+                    clientHandler.out.write(send);
+                    clientHandler.out.newLine();
+                    clientHandler.out.flush();
+                }
+            } catch (IOException e){
+                closeEverything(socket, in, out);
+            }
+        }
+    }
 
+    public void leave (){
+        clientHandlers.remove(this);
+        broadcastMessage("Server: " + username + " forlod gruppen!");
+    }
+
+    public void closeEverything(Socket socket, BufferedReader in, BufferedWriter out){
+        leave();
+        try {
+            if (in != null){
+                in.close();
+            }
+            if (out != null){
+                out.close();
+            }
+            if (socket != null){
+                socket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
