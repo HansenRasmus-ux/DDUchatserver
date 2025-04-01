@@ -41,7 +41,8 @@ public class Server {
     }
 
     public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(1234);
+        //Bruges til at starte serveren
+        ServerSocket serverSocket = new ServerSocket(1234); //producerer en serverport
         Server server = new Server(serverSocket);
         server.startServer();
     }

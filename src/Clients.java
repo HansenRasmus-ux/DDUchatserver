@@ -11,9 +11,9 @@ public class Clients {
     public Clients(Socket socket, String username) {
         try{
             this.socket = socket;
-            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            this.username = username;
+            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream())); // bruges til at modtage og læse beskeder.
+            this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())); // bruges til at skrive og sende beskeder ud.
+            this.username = username; // Brugerens brugernavn
         } catch (IOException e) {
             closeEverything(socket,in,out);
         }
@@ -27,6 +27,7 @@ public class Clients {
 
             Scanner scanner = new Scanner(System.in);
             while(socket.isConnected()) {
+                //display en brugers besked.
                 String msg = scanner.nextLine();
                 out.write(username + ": " + msg);
                 out.newLine();
@@ -59,6 +60,7 @@ public class Clients {
     }
 
     public void closeEverything(Socket socket, BufferedReader in, BufferedWriter out) {
+        //Lukker hele programmet // bruges til nogle af IOexceptions
         try {
             if (in != null){
                 in.close();
@@ -78,7 +80,7 @@ public class Clients {
         Scanner scanner = new Scanner(System.in);
         System.out.println("indtast dit brugernavn: ");
         String username = scanner.nextLine(); //Få fat i brugerens brugernavn
-        Socket socket = new Socket("localhost", 1234);
+        Socket socket = new Socket("localhost", 1234); // linker serverporten med serveren //Localhost betyder at serveren ligger på samme enhed som de andre clienter, så man har ikke brug for en ip-adresse
 
         Clients clients = new Clients(socket,username);
         clients.receive();
