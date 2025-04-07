@@ -53,9 +53,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void GUI() {
 
-    }
 
 
     public void leave (){

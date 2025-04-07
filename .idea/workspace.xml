@@ -56,7 +56,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Application.Clients">
+  <component name="RunManager">
     <configuration name="Clients" type="Application" factoryName="Application" singleton="false">
       <option name="MAIN_CLASS_NAME" value="Clients" />
       <module name="DDUchatserver" />
@@ -96,7 +96,7 @@
       <workItem from="1743074752011" duration="11548000" />
       <workItem from="1743152794269" duration="137000" />
       <workItem from="1743502442939" duration="9090000" />
-      <workItem from="1743668381123" duration="25240000" />
+      <workItem from="1743668381123" duration="33709000" />
     </task>
     <servers />
   </component>
