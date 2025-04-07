@@ -2,7 +2,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class ClientHandler implements Runnable {
+class ClientHandler implements Runnable {
 
     public static ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
     private Socket socket;
@@ -11,15 +11,17 @@ public class ClientHandler implements Runnable {
     private String username;
 
     public ClientHandler(Socket socket) {
-        try{
+        try {
             this.socket = socket;
-            this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())); //Bruges til at sende beskeder ud ting andre.
-            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream())); //Bruges til at modtage og læse beskeder.
-            this.username = this.in.readLine(); // Displayer personens brugernavn, før personens besked. // venter på at beskeden bliver sendt ud, før den reagere.
-            clientHandlers.add(this); // Tilfører brugerne til gruppen.
-            broadcastMessage("Server: " + username + " er deltaget i gruppen!"); // sender besked ud til andre brugere, at en ny bruger er deltaget og hvad de hedder.
-        } catch (IOException e){
-            closeEverything(socket, in, out); // exception, som skal laves til alle socket programmer.
+            this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())); // Used to send messages to clients
+            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream())); // Used to receive messages from clients
+
+            // Read the username from the client
+            this.username = this.in.readLine();
+            clientHandlers.add(this); // Add the client to the list
+            broadcastMessage("Server: " + username + " has joined the chat!"); // Notify others
+        } catch (IOException e) {
+            closeEverything(socket, in, out); // Handle exceptions
         }
     }
 
@@ -27,52 +29,50 @@ public class ClientHandler implements Runnable {
     public void run() {
         String message;
 
-        while(socket.isConnected()){
+        while (socket.isConnected()) {
             try {
-                message = in.readLine();
-                broadcastMessage(message);
-            } catch (IOException e){
+                message = in.readLine(); // Read messages from the client
+                if (message != null) {
+                    broadcastMessage(username + ": " + message); // Broadcast the message with the username
+                }
+            } catch (IOException e) {
                 closeEverything(socket, in, out);
                 break;
             }
         }
     }
-    public void broadcastMessage(String send){
-        for(ClientHandler clientHandler : clientHandlers){
-            try{
-                // hvis brugernavnet ikke er brugerens, så modtages beskeden til dem.
-                if(!clientHandler.username.equals(username))
-                {
+
+    public void broadcastMessage(String send) {
+        for (ClientHandler clientHandler : clientHandlers) {
+            try {
+                // Send message to all clients except the sender
+                if (!clientHandler.username.equals(username)) {
                     clientHandler.out.write(send);
                     clientHandler.out.newLine();
                     clientHandler.out.flush();
                 }
-            } catch (IOException e){
+            } catch (IOException e) {
                 closeEverything(socket, in, out);
             }
         }
     }
 
-
-
-
-    public void leave (){
-        //Bruges til at fjerne og fortælle de andre brugere at en bruger har forladt
+    public void leave() {
+        // Remove the client and notify others
         clientHandlers.remove(this);
-        broadcastMessage("Server: " + username + " forlod gruppen!");
+        broadcastMessage("Server: " + username + " has left the chat!");
     }
 
-    public void closeEverything(Socket socket, BufferedReader in, BufferedWriter out){
-        //Lukker hele applikationen.
+    public void closeEverything(Socket socket, BufferedReader in, BufferedWriter out) {
         leave();
         try {
-            if (in != null){
+            if (in != null) {
                 in.close();
             }
-            if (out != null){
+            if (out != null) {
                 out.close();
             }
-            if (socket != null){
+            if (socket != null) {
                 socket.close();
             }
         } catch (IOException e) {

@@ -1,11 +1,8 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
 
 public class Clients extends JFrame {
     private Socket socket;
@@ -13,108 +10,117 @@ public class Clients extends JFrame {
     private BufferedWriter out;
     private String username;
 
-    private JLabel AESCHATAPP;
-    private JTextField textField1;
-    private JButton sendButton;
-    public JTextArea textArea1;
-    private JPanel MainPanel;
-    private JButton Choosefile;
-    private JLabel Username;
-    private JTextField textField2;
+    private JTextField textField1; // Input field for messages
+    private JButton sendButton; // Button to send messages
+    public JTextArea textArea1; // Area to display messages
 
     public Clients(Socket socket, String username) {
-        try{
-            this.socket = socket;
-            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream())); // bruges til at modtage og læse beskeder.
-            this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())); // bruges til at skrive og sende beskeder ud.
-            this.username = username; // Brugerens brugernavn
-            GUI();
-        } catch (IOException e) {
-            closeEverything(socket,in,out);
-        }
+        this.socket = socket;
+        this.username = username; // User's username
+        initializeGUI(); // Initialize the GUI components
+        setupNetworking(); // Setup networking
     }
 
-    public void GUI() {
-        this.setContentPane(MainPanel);
-        this.setTitle("AES Chatapp");
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(750, 500);
-        this.setLocationRelativeTo(null);
-        this.setVisible(true);
-        textField1.addKeyListener(new KeyAdapter() {
+    private void initializeGUI() {
+        // Create the main panel
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS)); // Set layout
+
+        // Create components
+        textArea1 = new JTextArea(20, 50);
+        textArea1.setEditable(false); // Make the text area read-only
+        JScrollPane scrollPane = new JScrollPane(textArea1); // Add scroll pane for text area
+
+        textField1 = new JTextField(50); // Input field for messages
+        sendButton = new JButton("Send"); // Button to send messages
+
+        // Add components to the main panel
+        mainPanel.add(scrollPane);
+        mainPanel.add(textField1);
+        mainPanel.add(sendButton);
+
+        // Set the content pane
+        setContentPane(mainPanel);
+        setTitle("Chat App");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        pack(); // Adjusts the frame to fit the components
+        setLocationRelativeTo(null); // Center the frame
+        setVisible(true); // Make the frame visible
+
+        // Action listener for the send button
+        sendButton.addActionListener(new ActionListener() {
             @Override
-            public void keyTyped(KeyEvent e) {
-                super.keyTyped(e);
+            public void actionPerformed(ActionEvent e) {
+                sendMessage();
             }
+        });
 
+        // Key listener for the text field to send messages on Enter key press
+        textField1.addActionListener(new ActionListener() {
             @Override
-            public void keyPressed(KeyEvent e) {
-                super.keyPressed(e);
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                super.keyReleased(e);
-                if (e.getKeyCode() == 10) {
-                    String message = textField1.getText();
-
-
-                }
+            public void actionPerformed(ActionEvent e) {
+                sendMessage();
             }
         });
     }
 
-    public void send() {
+    private void setupNetworking() {
         try {
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
+            // Send the username as the first message
             out.write(username);
             out.newLine();
             out.flush();
 
-            Scanner scanner = new Scanner(System.in);
-            while(socket.isConnected()) {
-                //display en brugers besked.
-                String msg = scanner.nextLine();
-                out.write(username + ": " + msg);
+            receive(); // Start receiving messages
+        } catch (IOException e) {
+            closeEverything(socket, in, out);
+        }
+    }
+
+    private void sendMessage() {
+        try {
+            String message = textField1.getText();
+            if (!message.isEmpty()) {
+                out.write(message); // Send the message to the server
                 out.newLine();
                 out.flush();
+                textField1.setText(""); // Clear the text field after sending
             }
         } catch (IOException e) {
-            closeEverything(socket,in,out);
+            closeEverything(socket, in, out);
         }
     }
 
     public void receive() {
         new Thread(new Runnable() {
-
-            String msgfrommember;
+            String msgFromMember;
 
             @Override
             public void run() {
-                while(socket.isConnected()) {
+                while (socket.isConnected()) {
                     try {
-                        msgfrommember = in.readLine();
-                        textField1.getText();
+                        msgFromMember = in.readLine();
+                        textArea1.append(msgFromMember + "\n"); // Append the message to the text area
                     } catch (IOException e) {
-                        closeEverything(socket,in,out);
+                        closeEverything(socket, in, out);
                     }
                 }
-
             }
         }).start();
-
     }
 
-
-    public void closeEverything(Socket socket, BufferedReader in, BufferedWriter out) {
-        //Lukker hele programmet // bruges til nogle af IOexceptions
+    private void closeEverything(Socket socket, BufferedReader in, BufferedWriter out) {
         try {
-            if (in != null){
+            if (in != null) {
                 in.close();
             }
-            if (out != null){
+            if (out != null) {
                 out.close();
             }
-            if (socket != null){
+            if (socket != null) {
                 socket.close();
             }
         } catch (IOException e) {
@@ -122,15 +128,17 @@ public class Clients extends JFrame {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        GUI GUI = new GUI();
-        Scanner scanner = new Scanner(System.in);
-        String username = scanner.nextLine(); //Få fat i brugerens brugernavn
-        Socket socket = new Socket("localhost", 1234); // linker serverporten med serveren
-        // Localhost betyder at serveren ligger på samme enhed som de andre clienter, så man har ikke brug for en ip-adresse
-
-        Clients clients = new Clients(socket,username);
-        clients.receive();
-        clients.send();
+    public static void main(String[] args) {
+        String username = JOptionPane.showInputDialog("Enter your username:"); // Get the username from a dialog
+        if (username != null && !username.trim().isEmpty()) { // Check if username is valid
+            try {
+                Socket socket = new Socket("localhost", 1234); // Connect to the server
+                new Clients(socket, username); // Create a new Clients instance
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Username cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
