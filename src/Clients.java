@@ -77,10 +77,12 @@ public class Clients {
     }
 
     public static void main(String[] args) throws IOException {
+        new GUI();
         Scanner scanner = new Scanner(System.in);
         System.out.println("indtast dit brugernavn: ");
         String username = scanner.nextLine(); //Få fat i brugerens brugernavn
-        Socket socket = new Socket("localhost", 1234); // linker serverporten med serveren //Localhost betyder at serveren ligger på samme enhed som de andre clienter, så man har ikke brug for en ip-adresse
+        Socket socket = new Socket("localhost", 1234); // linker serverporten med serveren
+        // Localhost betyder at serveren ligger på samme enhed som de andre clienter, så man har ikke brug for en ip-adresse
 
         Clients clients = new Clients(socket,username);
         clients.receive();

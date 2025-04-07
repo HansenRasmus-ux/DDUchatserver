@@ -53,6 +53,11 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    public void GUI() {
+
+    }
+
+
     public void leave (){
         //Bruges til at fjerne og fortælle de andre brugere at en bruger har forladt
         clientHandlers.remove(this);
