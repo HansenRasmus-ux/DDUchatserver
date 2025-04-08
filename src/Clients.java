@@ -16,7 +16,7 @@ public class Clients extends JFrame {
     private JLabel AESCHATAPP;
     private JTextField textField1;
     public JTextArea textArea1;
-    private JPanel MainPanel;
+
 
 
     public Clients(Socket socket, String username) {
@@ -35,12 +35,16 @@ public class Clients extends JFrame {
         JPanel MainPanel = new JPanel();
         MainPanel.setLayout(new BoxLayout(MainPanel, BoxLayout.Y_AXIS));
 
+        AESCHATAPP = new JLabel("AES CHAT APP", SwingConstants.CENTER);
+        AESCHATAPP.setFont(new Font("Serif", Font.BOLD, 20));
+
         textArea1 = new JTextArea(25,50);
         textArea1.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea1);
 
         textField1 = new JTextField(50);
 
+        MainPanel.add(AESCHATAPP);
         MainPanel.add(scrollPane);
         MainPanel.add(textField1);
 

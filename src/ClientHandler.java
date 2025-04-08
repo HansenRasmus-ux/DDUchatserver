@@ -30,9 +30,9 @@ class ClientHandler implements Runnable {
         while(socket.isConnected()){
             try {
                 message = in.readLine();
-                if (message != null) {
-                    broadcastMessage(username + ": " + message);
-                }
+
+                broadcastMessage(username + ": " + message);
+
             } catch (IOException e){
                 closeEverything(socket, in, out);
                 break;
@@ -43,12 +43,11 @@ class ClientHandler implements Runnable {
         for(ClientHandler clientHandler : clientHandlers){
             try{
                 // hvis brugernavnet ikke er brugerens, så modtages beskeden til dem.
-                if(!clientHandler.username.equals(username))
-                {
+
                     clientHandler.out.write(send);
                     clientHandler.out.newLine();
                     clientHandler.out.flush();
-                }
+
             } catch (IOException e){
                 closeEverything(socket, in, out);
             }
