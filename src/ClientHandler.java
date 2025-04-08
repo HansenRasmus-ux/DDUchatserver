@@ -2,7 +2,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class ClientHandler implements Runnable {
+class ClientHandler implements Runnable {
 
     public static ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
     private Socket socket;
@@ -30,7 +30,9 @@ public class ClientHandler implements Runnable {
         while(socket.isConnected()){
             try {
                 message = in.readLine();
-                broadcastMessage(message);
+                if (message != null) {
+                    broadcastMessage(username + ": " + message);
+                }
             } catch (IOException e){
                 closeEverything(socket, in, out);
                 break;
